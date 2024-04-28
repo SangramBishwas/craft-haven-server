@@ -3,13 +3,12 @@ const cors = require('cors');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const { config } = require('dotenv');
 app.use(cors());
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.3mmbmgw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-console.log(uri)
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -27,9 +26,28 @@ async function run() {
 
     const craftCollection = client.db('craftDB').collection('crafts')
 
-    
+    app.get('/craft', async (req, res) => {
+      const cursor = craftCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
 
-    app.post('/craft', async(req, res) => {
+    app.get('/craft/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await craftCollection.findOne(query);
+      res.send(result);
+    })
+
+    app.get('/myCraft/:email', async (req, res) => {
+      console.log(req.params.email);
+      const query = { email: req.params.email }
+      console.log(query)
+      const result = await craftCollection.find(query).toArray();
+      res.send(result)
+    })
+
+    app.post('/craft', async (req, res) => {
       const newCraft = req.body;
       const result = await craftCollection.insertOne(newCraft);
       res.send(result);
@@ -46,9 +64,9 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('assignment-10 is running in the server')
+  res.send('assignment-10 is running in the server')
 })
 
 app.listen(port, () => {
-    console.log(`assignment-10 is running on port: ${port}`)
+  console.log(`assignment-10 is running on port: ${port}`)
 })
