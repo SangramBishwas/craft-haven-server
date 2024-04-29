@@ -52,6 +52,26 @@ async function run() {
       const result = await craftCollection.insertOne(newCraft);
       res.send(result);
     })
+
+    app.put('/craft/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedCraft = req.body;
+      const craft = {
+        $set: {
+          artist: updatedCraft.artist,
+          image: updatedCraft.image,
+          description: updatedCraft.description,
+          price: updatedCraft.price,
+          time: updatedCraft.time,
+          customization: updatedCraft.customization,
+          stock: updatedCraft.stock
+        }
+      }
+      const result = await craftCollection.updateOne(filter, craft);
+      res.send(result)
+
+    })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
